@@ -91,7 +91,7 @@ export default class TextLine {
 
   draw(time) {
     // this.ctx.translate(this.width * 0.5, this.height * 0.5);
-    this.ctx.rotate(Math.sin(time * 5.0) * 0.001);
+    // this.ctx.rotate(Math.sin(time * 5.0) * 0.001);
     // this.ctx.translate(0, 0);
 
     this.ctx.clearRect(0, 0, this.width, this.height);

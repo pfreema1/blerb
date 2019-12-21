@@ -4,34 +4,37 @@ uniform sampler2D uTextCanvas;
 uniform sampler2D uBlobTexture;
 uniform vec2 uResolution;
 uniform float uTime;
+uniform vec2 uMouse;
+
+//  Function from Iñigo Quiles
+//  www.iquilezles.org/www/articles/functions/functions.htm
+float pcurve( float x, float a, float b ){
+    float k = pow(a+b,a+b) / (pow(a,a)*pow(b,b));
+    return k * pow( x, a ) * pow( 1.0-x, b );
+}
 
 void main() {
     vec2 uv = gl_FragCoord.xy / uResolution.xy;
     vec4 color = texture2D(uScene, uv);
+
+    float y = pcurve(uv.x, 2.0, 1.0);
+
+    uv.x *= y;
+
+    vec4 refractColor1 = texture2D(uTextCanvas, uv + (y * 0.01 * (uv.x)));
+    vec4 refractColor2 = texture2D(uTextCanvas, uv + (y * 0.02 * (uv.x)));
+    vec4 refractColor3 = texture2D(uTextCanvas, uv + (y * 0.03 * (uv.x)));
+
+    vec4 refractColor = vec4(refractColor1.r, refractColor2.g, refractColor3.b, 1.0);
+
+    // uv.x *= pow(uv.x, 2.0);      
+    // uv = fract(uv); // Wrap arround 1.0
+
     vec4 textCanvasColor = texture2D(uTextCanvas, uv);
-    vec4 normalColor = texture2D(uBlobTexture, uv);
-    vec3 normal = normalize(normalColor.rgb * 2.0 - 1.0);
+    color = refractColor;
 
-    // only show normalColor
-    // vec4 foo = mix(normalColor, textCanvasColor, normal.r);
-    // color = foo;
 
-    // create refraction of textCanvas using normal
-    float refractAtten = 0.06;
-    vec3 refractVec1 = refract(vec3(0.0, 0.0, 1.0), normal, 0.05) * refractAtten;
-    vec3 refractVec2 = refract(vec3(0.7, 0.0, 1.0), normal, 0.05) * refractAtten;
-    vec3 refractVec3 = refract(vec3(-0.7, 0.0, 1.0), normal, 0.05) * refractAtten;
-    vec4 refractColor1 = texture2D(uTextCanvas, uv + refractVec1.xy);
-    vec4 refractColor2 = texture2D(uTextCanvas, uv + refractVec2.xy);
-    vec4 refractColor3 = texture2D(uTextCanvas, uv + refractVec3.xy);
 
-    vec4 chromAberrColor = vec4(refractColor1.r, refractColor2.g, refractColor3.b, 1.0);
-
-    // separate out the background and the textcanvas 
-    color = mix(normalColor, chromAberrColor, step(0.01, normalColor.r));
-
-    // mix in a little shading
-    color = mix(normalColor, color, normalColor.b);
 
     gl_FragColor = vec4(color);
 }

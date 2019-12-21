@@ -9,15 +9,6 @@ import TweenMax from 'TweenMax';
 import TextCanvas from './TextCanvas';
 import Blob from './Blob';
 
-function remap(t, old_min, old_max, new_min, new_max) {
-  let old_range = old_max - old_min;
-  let normalizedT = t - old_min;
-  let normalizedVal = normalizedT / old_range;
-  let new_range = new_max - new_min;
-  let newVal = normalizedVal * new_range + new_min;
-  return newVal;
-}
-
 export default class WebGLView {
   constructor(app) {
     this.app = app;
@@ -37,6 +28,7 @@ export default class WebGLView {
     await this.loadTextMesh();
     this.setupTextCanvas();
     this.setupBlob();
+    this.setupMouseListener();
     this.initRenderTri();
   }
 
@@ -136,6 +128,9 @@ export default class WebGLView {
         uResolution: { value: resolution },
         uTime: {
           value: 0.0
+        },
+        uMouse: {
+          value: this.mouse
         }
       }
     });
@@ -164,6 +159,24 @@ export default class WebGLView {
     this.controls.update();
 
     this.bgScene = new THREE.Scene();
+  }
+
+  setupMouseListener() {
+    this.mouse = {
+      x: null,
+      y: null
+    };
+
+    this.width = window.innerWidth;
+    this.height = window.innerHeight;
+    document.addEventListener('mousemove', this.onMouseMove.bind(this));
+  }
+
+  onMouseMove({ clientX, clientY }) {
+    this.mouse.x = (clientX / this.width) * 2 - 1;
+    this.mouse.y = -(clientY / this.height) * 2 + 1;
+
+    this.triMaterial.uniforms.uMouse.value = this.mouse;
   }
 
   resize() {
