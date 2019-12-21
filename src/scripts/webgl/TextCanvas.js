@@ -35,7 +35,7 @@ export default class TextCanvas {
       textSnippetWidth,
       snippetPadding,
       scrollSpeed,
-      -1,
+      1,
       this.ctx,
       fontSize
     );

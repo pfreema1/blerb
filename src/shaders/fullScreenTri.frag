@@ -13,27 +13,30 @@ float pcurve( float x, float a, float b ){
     return k * pow( x, a ) * pow( 1.0-x, b );
 }
 
+//  Function from Iñigo Quiles
+//  www.iquilezles.org/www/articles/functions/functions.htm
+float expStep( float x, float k, float n ){
+    return exp( -k*pow(x,n) );
+}
+
+float myCurve(float x) {
+    // -((x - 0.5) * 2)^2 + 1
+    return -pow((x - 0.5) * 4.0, 2.0) + 1.0;
+}
+
 void main() {
     vec2 uv = gl_FragCoord.xy / uResolution.xy;
     vec4 color = texture2D(uScene, uv);
 
-    float y = pcurve(uv.x, 2.0, 1.0);
+    float y = 1.0 - expStep(uv.x, 5.0, 2.0);
 
     uv.x *= y;
-
-    vec4 refractColor1 = texture2D(uTextCanvas, uv + (y * 0.01 * (uv.x)));
-    vec4 refractColor2 = texture2D(uTextCanvas, uv + (y * 0.02 * (uv.x)));
-    vec4 refractColor3 = texture2D(uTextCanvas, uv + (y * 0.03 * (uv.x)));
-
-    vec4 refractColor = vec4(refractColor1.r, refractColor2.g, refractColor3.b, 1.0);
-
-    // uv.x *= pow(uv.x, 2.0);      
-    // uv = fract(uv); // Wrap arround 1.0
+    uv.y *= 2.0 * uv.x;
 
     vec4 textCanvasColor = texture2D(uTextCanvas, uv);
-    color = refractColor;
+    color = textCanvasColor;
 
-
+    
 
 
     gl_FragColor = vec4(color);
